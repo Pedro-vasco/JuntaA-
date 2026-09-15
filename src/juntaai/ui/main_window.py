@@ -23,10 +23,10 @@ from PySide6.QtWidgets import (
 )
 from pypdf import PdfReader
 
-from juntaa.config import COMPRESSION_PRESETS, DOCX_EXTENSIONS, IMAGE_EXTENSIONS, OUTPUT_FORMATS, PDF_EXTENSIONS
-from juntaa.converters.docx_adapter import describe_docx
-from juntaa.models import MergeItem
-from juntaa.services.pdf_exporter import ExportError, export_items_to_pdf
+from juntaai.config import COMPRESSION_PRESETS, DOCX_EXTENSIONS, IMAGE_EXTENSIONS, OUTPUT_FORMATS, PDF_EXTENSIONS
+from juntaai.converters.docx_adapter import describe_docx
+from juntaai.models import MergeItem
+from juntaai.services.pdf_exporter import ExportError, export_items_to_pdf
 
 LOGGER = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class ExportWorker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("JuntaA - Unificador de arquivos")
+        self.setWindowTitle("JuntaAi - Unificador de arquivos")
         self.resize(900, 600)
         self.items: list[MergeItem] = []
         self.export_thread: QThread | None = None

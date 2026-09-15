@@ -10,9 +10,9 @@ from typing import Callable, Iterable
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
 
-from juntaa.config import COMPRESSION_PRESETS, CompressionPreset
-from juntaa.converters.docx_adapter import DocxConversionError, convert_docx_to_pdf
-from juntaa.models import MergeItem
+from juntaai.config import COMPRESSION_PRESETS, CompressionPreset
+from juntaai.converters.docx_adapter import DocxConversionError, convert_docx_to_pdf
+from juntaai.models import MergeItem
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def export_items_to_pdf(
 
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    with tempfile.TemporaryDirectory(prefix="juntaa-") as tmp_dir_name:
+    with tempfile.TemporaryDirectory(prefix="juntaai-") as tmp_dir_name:
         tmp_dir = Path(tmp_dir_name)
         total = len(items)
 

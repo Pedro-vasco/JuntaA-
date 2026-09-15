@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import sys
 
-APP_NAME = "JuntaA"
+APP_NAME = "JuntaAi"
 OUTPUT_FORMATS = ("PDF",)
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
 PDF_EXTENSIONS = {".pdf"}

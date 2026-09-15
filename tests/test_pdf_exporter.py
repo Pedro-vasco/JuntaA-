@@ -8,9 +8,9 @@ from unittest.mock import patch
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
 
-from juntaa.converters.docx_adapter import DocxConversionError
-from juntaa.models import MergeItem
-from juntaa.services.pdf_exporter import ExportError, export_items_to_pdf
+from juntaai.converters.docx_adapter import DocxConversionError
+from juntaai.models import MergeItem
+from juntaai.services.pdf_exporter import ExportError, export_items_to_pdf
 
 
 class PdfExporterTests(unittest.TestCase):
@@ -67,7 +67,7 @@ class PdfExporterTests(unittest.TestCase):
             docx_path.write_bytes(b"placeholder")
 
             with patch(
-                "juntaa.services.pdf_exporter.convert_docx_to_pdf",
+                "juntaai.services.pdf_exporter.convert_docx_to_pdf",
                 side_effect=DocxConversionError("Word não disponível"),
             ):
                 warnings = export_items_to_pdf(

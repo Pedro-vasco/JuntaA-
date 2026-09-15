@@ -5,8 +5,8 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-from juntaa.logging_utils import configure_logging
-from juntaa.ui.main_window import MainWindow
+from juntaai.logging_utils import configure_logging
+from juntaai.ui.main_window import MainWindow
 
 LOGGER = logging.getLogger(__name__)
 

@@ -8,8 +8,8 @@ if not exist .venv (
 call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-pyinstaller --noconfirm --clean --onefile --windowed --name JuntaA --paths src src\juntaa\__main__.py
+pyinstaller --noconfirm --clean --onefile --windowed --name JuntaAi --paths src src\juntaai\__main__.py
 
 echo.
-echo Build concluído. Executável em dist\JuntaA.exe
+echo Build concluído. Executável em dist\JuntaAi.exe
 endlocal

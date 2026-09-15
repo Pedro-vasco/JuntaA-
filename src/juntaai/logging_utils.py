@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from juntaa.config import get_log_file
+from juntaai.config import get_log_file
 
 
 def configure_logging() -> Path:

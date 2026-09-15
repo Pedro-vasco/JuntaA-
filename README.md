@@ -1,4 +1,4 @@
-# JuntaA
+# JuntaAi
 
 Aplicativo desktop portátil para Windows 10/11 focado em unir arquivos de **imagem**, **PDF** e **DOCX** em um único **PDF**.
 
@@ -33,14 +33,14 @@ pip install -r requirements.txt
 ## Como executar em modo desenvolvimento
 
 ```bash
-PYTHONPATH=src python -m juntaa
+PYTHONPATH=src python -m juntaai
 ```
 
 No Windows PowerShell:
 
 ```powershell
 $env:PYTHONPATH = "src"
-python -m juntaa
+python -m juntaai
 ```
 
 ## Como gerar o `.exe` portátil no Windows
@@ -55,7 +55,7 @@ O script:
 
 1. cria `.venv` se necessário
 2. instala as dependências de `requirements.txt`
-3. gera `dist\JuntaA.exe` com `PyInstaller --onefile --windowed`
+3. gera `dist\JuntaAi.exe` com `PyInstaller --onefile --windowed`
 
 ## Presets de compressão
 
@@ -81,7 +81,7 @@ Se a conversão não estiver disponível no ambiente:
 
 ```text
 src/
-  juntaa/
+  juntaai/
     converters/
     services/
     ui/
