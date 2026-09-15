@@ -62,6 +62,8 @@ def export_items_to_pdf(
             except DocxConversionError as exc:
                 LOGGER.warning("DOCX ignorado durante exportação: %s", item.path)
                 warnings.append(f"{item.path.name}: {exc}")
+            except ExportError:
+                raise
             except Exception as exc:  # noqa: BLE001
                 LOGGER.exception("Falha ao processar %s", item.path)
                 raise ExportError(f"Falha ao processar '{item.path.name}': {exc}") from exc
@@ -99,7 +101,7 @@ def _convert_image_to_pdf(source: Path, tmp_dir: Path, preset: CompressionPreset
         jpeg_buffer,
         format="JPEG",
         quality=preset.jpeg_quality,
-        optimize=True,
+        optimize=preset.optimize_jpeg,
         dpi=(preset.dpi, preset.dpi),
     )
     jpeg_buffer.seek(0)

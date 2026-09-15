@@ -18,12 +18,13 @@ class CompressionPreset:
     dpi: int
     jpeg_quality: int
     max_dimension: int
+    optimize_jpeg: bool
 
 
 COMPRESSION_PRESETS = {
-    "Baixa": CompressionPreset(label="Baixa", dpi=300, jpeg_quality=92, max_dimension=2600),
-    "Média": CompressionPreset(label="Média", dpi=200, jpeg_quality=80, max_dimension=1800),
-    "Alta": CompressionPreset(label="Alta", dpi=120, jpeg_quality=65, max_dimension=1280),
+    "Baixa": CompressionPreset(label="Baixa", dpi=300, jpeg_quality=92, max_dimension=2600, optimize_jpeg=False),
+    "Média": CompressionPreset(label="Média", dpi=200, jpeg_quality=80, max_dimension=1800, optimize_jpeg=True),
+    "Alta": CompressionPreset(label="Alta", dpi=120, jpeg_quality=65, max_dimension=1280, optimize_jpeg=True),
 }
 
 

@@ -47,7 +47,7 @@ finally {{
 }}
 """.strip()
     encoded_script = b64encode(script.encode("utf-16le")).decode("ascii")
-    shell_command = shutil.which("powershell") or shutil.which("pwsh")
+    shell_command = shutil.which("pwsh") or shutil.which("powershell")
     if not shell_command:
         raise DocxConversionError(
             "PowerShell não foi encontrado. Use Windows 10/11 com Microsoft Word para converter DOCX."
