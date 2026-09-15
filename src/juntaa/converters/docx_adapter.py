@@ -57,7 +57,8 @@ finally {{
         subprocess.run(
             [shell_command, "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_script],
             check=True,
-            capture_output=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
             text=True,
         )
     except subprocess.CalledProcessError as exc:

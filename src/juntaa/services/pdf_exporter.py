@@ -92,7 +92,11 @@ def export_items_to_pdf(
                 temp_output_path.unlink(missing_ok=True)
                 raise
 
-        os.replace(temp_output_path, destination)
+        try:
+            os.replace(temp_output_path, destination)
+        except Exception:
+            temp_output_path.unlink(missing_ok=True)
+            raise
 
     LOGGER.info("PDF exportado com sucesso em %s", destination)
     return warnings

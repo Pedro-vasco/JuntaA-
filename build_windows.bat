@@ -11,5 +11,5 @@ pip install -r requirements.txt
 pyinstaller --noconfirm --clean --onefile --windowed --name JuntaA --paths src src\juntaa\__main__.py
 
 echo.
-echo Build concluido. Executavel em dist\JuntaA.exe
+echo Build concluído. Executável em dist\JuntaA.exe
 endlocal

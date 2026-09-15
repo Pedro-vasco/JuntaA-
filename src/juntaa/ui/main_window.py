@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
             path = Path(file_name)
             try:
                 item = self._build_item(path)
-            except Exception as exc:  # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 LOGGER.exception("Falha ao adicionar arquivo: %s", path)
                 ignored.append(f"{path.name}: {self._friendly_add_error(path)}")
                 continue
