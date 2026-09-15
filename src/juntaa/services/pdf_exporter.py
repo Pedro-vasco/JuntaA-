@@ -4,6 +4,7 @@ import logging
 from io import BytesIO
 from pathlib import Path
 import tempfile
+import os
 from typing import Callable, Iterable
 
 from PIL import Image
@@ -77,8 +78,21 @@ def export_items_to_pdf(
         if hasattr(writer, "compress_identical_objects"):
             writer.compress_identical_objects(remove_identicals=True, remove_orphans=True)
 
-        with destination.open("wb") as output_file:
-            writer.write(output_file)
+        with tempfile.NamedTemporaryFile(
+            prefix=f"{destination.stem}-",
+            suffix=".pdf",
+            dir=destination.parent,
+            delete=False,
+        ) as temp_output:
+            temp_output_path = Path(temp_output.name)
+            try:
+                writer.write(temp_output)
+            except Exception:
+                temp_output.close()
+                temp_output_path.unlink(missing_ok=True)
+                raise
+
+        os.replace(temp_output_path, destination)
 
     LOGGER.info("PDF exportado com sucesso em %s", destination)
     return warnings

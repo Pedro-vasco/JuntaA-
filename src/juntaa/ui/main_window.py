@@ -129,6 +129,11 @@ class MainWindow(QMainWindow):
             "MVP: itens são reordenados por arquivo. PDFs e DOCX preservam a ordem interna de páginas."
         )
         help_label.setWordWrap(True)
+        help_label.setAccessibleName("Limitação da ordenação no MVP")
+        help_label.setAccessibleDescription(help_label.text())
+        self.file_list.setAccessibleDescription(help_label.text())
+        self.up_button.setAccessibleDescription(help_label.text())
+        self.down_button.setAccessibleDescription(help_label.text())
 
         main_layout.addLayout(controls_layout)
         main_layout.addWidget(self.file_list, stretch=1)
@@ -158,7 +163,7 @@ class MainWindow(QMainWindow):
                 item = self._build_item(path)
             except Exception as exc:  # noqa: BLE001
                 LOGGER.exception("Falha ao adicionar arquivo: %s", path)
-                ignored.append(f"{path.name}: {exc}")
+                ignored.append(f"{path.name}: {self._friendly_add_error(path)}")
                 continue
 
             self.items.append(item)
@@ -183,6 +188,17 @@ class MainWindow(QMainWindow):
         if suffix in DOCX_EXTENSIONS:
             return MergeItem(path=path, item_type="docx", description=describe_docx(path))
         raise ValueError("Extensão não suportada")
+
+    @staticmethod
+    def _friendly_add_error(path: Path) -> str:
+        suffix = path.suffix.lower()
+        if suffix in IMAGE_EXTENSIONS:
+            return "não foi possível ler a imagem. Verifique se o arquivo está íntegro."
+        if suffix in PDF_EXTENSIONS:
+            return "não foi possível ler o PDF. O arquivo pode estar inválido ou protegido."
+        if suffix in DOCX_EXTENSIONS:
+            return "não foi possível ler o DOCX. Verifique se o arquivo está íntegro."
+        return "arquivo não suportado ou inválido."
 
     def move_item_up(self) -> None:
         index = self.file_list.currentRow()
