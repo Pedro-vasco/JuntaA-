@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from io import BytesIO
 from pathlib import Path
 import tempfile
 from typing import Callable, Iterable
@@ -89,16 +90,17 @@ def _convert_image_to_pdf(source: Path, tmp_dir: Path, preset: CompressionPreset
     image.load()
     normalized = _normalize_image(image, preset)
 
-    jpeg_path = tmp_dir / f"image-{index}.jpg"
     pdf_path = tmp_dir / f"image-{index}.pdf"
+    jpeg_buffer = BytesIO()
     normalized.save(
-        jpeg_path,
+        jpeg_buffer,
         format="JPEG",
         quality=preset.jpeg_quality,
         optimize=True,
         dpi=(preset.dpi, preset.dpi),
     )
-    with Image.open(jpeg_path) as compressed_image:
+    jpeg_buffer.seek(0)
+    with Image.open(jpeg_buffer) as compressed_image:
         compressed_image.convert("RGB").save(pdf_path, format="PDF", resolution=preset.dpi)
     return pdf_path
 

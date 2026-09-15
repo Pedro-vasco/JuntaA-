@@ -188,12 +188,17 @@ class MainWindow(QMainWindow):
             self.destination_input.setText(str(destination_path))
 
     def export_pdf(self) -> None:
+        if self.output_format_combo.currentText() != "PDF":
+            QMessageBox.warning(self, "Formato inválido", "O MVP exporta apenas em PDF.")
+            return
+
         destination_text = self.destination_input.text().strip()
         if not destination_text:
             QMessageBox.warning(self, "Destino obrigatório", "Selecione o arquivo PDF de saída.")
             return
 
-        destination = Path(destination_text)
+        destination = self._normalize_destination(Path(destination_text))
+        self.destination_input.setText(str(destination))
         self.export_button.setEnabled(False)
         self.progress_bar.setValue(0)
         self.status_bar.showMessage("Iniciando exportação...")
@@ -223,3 +228,9 @@ class MainWindow(QMainWindow):
         percentage = int((current / total) * 100) if total else 0
         self.progress_bar.setValue(percentage)
         self.status_bar.showMessage(message)
+
+    @staticmethod
+    def _normalize_destination(destination: Path) -> Path:
+        if destination.suffix.lower() != ".pdf":
+            return destination.with_suffix(".pdf")
+        return destination

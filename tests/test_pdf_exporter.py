@@ -83,6 +83,28 @@ class PdfExporterTests(unittest.TestCase):
             self.assertIn("Word não disponível", warnings[0])
             self.assertEqual(len(PdfReader(str(output_path)).pages), 1)
 
+    def test_progress_callback_receives_start_and_finish_updates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir_name:
+            tmp_dir = Path(tmp_dir_name)
+            image_path = tmp_dir / "sample.png"
+            output_path = tmp_dir / "merged.pdf"
+            updates: list[tuple[int, int, str]] = []
+
+            Image.new("RGB", (600, 400), "orange").save(image_path)
+
+            export_items_to_pdf(
+                [MergeItem(path=image_path, item_type="image", description="Imagem")],
+                output_path,
+                "Média",
+                progress_callback=lambda current, total, message: updates.append((current, total, message)),
+            )
+
+            self.assertEqual(len(updates), 2)
+            self.assertEqual(updates[0][0:2], (0, 1))
+            self.assertIn("Processando", updates[0][2])
+            self.assertEqual(updates[1][0:2], (1, 1))
+            self.assertIn("Concluído", updates[1][2])
+
 
 if __name__ == "__main__":
     unittest.main()
