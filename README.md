@@ -1,5 +1,4 @@
 # JuntaAi
-
 Aplicativo desktop portátil para Windows 10/11 focado em unir arquivos de **imagem**, **PDF** e **DOCX** em um único **PDF**.
 
 ## Visão geral
