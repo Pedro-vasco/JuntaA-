@@ -4,6 +4,7 @@ from base64 import b64encode
 import logging
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 
 from docx import Document
@@ -46,18 +47,19 @@ finally {{
 }}
 """.strip()
     encoded_script = b64encode(script.encode("utf-16le")).decode("ascii")
+    shell_command = shutil.which("powershell") or shutil.which("pwsh")
+    if not shell_command:
+        raise DocxConversionError(
+            "PowerShell não foi encontrado. Use Windows 10/11 com Microsoft Word para converter DOCX."
+        )
 
     try:
         subprocess.run(
-            ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_script],
+            [shell_command, "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_script],
             check=True,
             capture_output=True,
             text=True,
         )
-    except FileNotFoundError as exc:
-        raise DocxConversionError(
-            "PowerShell não foi encontrado. Use Windows 10/11 com Microsoft Word para converter DOCX."
-        ) from exc
     except subprocess.CalledProcessError as exc:
         LOGGER.exception("Falha ao converter DOCX: %s", source)
         stderr = (exc.stderr or "").strip()

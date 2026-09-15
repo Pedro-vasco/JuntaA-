@@ -120,6 +120,13 @@ class PdfExporterTests(unittest.TestCase):
                     "Inválida",
                 )
 
+    def test_empty_items_raise_export_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir_name:
+            output_path = Path(tmp_dir_name) / "merged.pdf"
+
+            with self.assertRaises(ExportError):
+                export_items_to_pdf([], output_path, "Média")
+
 
 if __name__ == "__main__":
     unittest.main()

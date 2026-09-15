@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
         self.export_thread: QThread | None = None
         self.export_worker: ExportWorker | None = None
         self.current_destination: Path | None = None
+        self.last_export_succeeded = False
 
         self.file_list = QListWidget()
         self.file_list.setSelectionMode(QListWidget.SingleSelection)
@@ -222,6 +223,10 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Formato inválido", "O MVP exporta apenas em PDF.")
             return
 
+        if not self.items:
+            QMessageBox.warning(self, "Nenhum arquivo", "Adicione ao menos um arquivo antes de exportar.")
+            return
+
         destination_text = self.destination_input.text().strip()
         if not destination_text:
             QMessageBox.warning(self, "Destino obrigatório", "Selecione o arquivo PDF de saída.")
@@ -233,6 +238,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         self.status_bar.showMessage("Iniciando exportação...")
         self.current_destination = destination
+        self.last_export_succeeded = False
 
         self.export_thread = QThread(self)
         self.export_worker = ExportWorker(self.items, destination, self.compression_combo.currentText())
@@ -261,6 +267,7 @@ class MainWindow(QMainWindow):
 
     def _handle_export_success(self, warnings: list[str]) -> None:
         destination = self.current_destination
+        self.last_export_succeeded = True
         message = f"PDF exportado com sucesso em:\n{destination}" if destination else "PDF exportado com sucesso."
         if warnings:
             message += "\n\nAlguns arquivos foram ignorados:\n" + "\n".join(warnings)
@@ -268,12 +275,15 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage("Exportação concluída")
 
     def _handle_export_error(self, message: str) -> None:
+        self.last_export_succeeded = False
         QMessageBox.critical(self, "Falha na exportação", message)
         self.status_bar.showMessage("Falha na exportação")
 
     def _finish_export(self) -> None:
         self.export_button.setEnabled(True)
-        if self.progress_bar.value() < 100:
-            self.progress_bar.setValue(100 if self.items else 0)
+        if self.last_export_succeeded:
+            self.progress_bar.setValue(100)
+        else:
+            self.progress_bar.setValue(0)
         self.export_thread = None
         self.export_worker = None
