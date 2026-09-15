@@ -17,7 +17,7 @@ O MVP oferece:
 
 ## Requisitos
 
-- Python **3.11+**
+- Python **3.11** (versão suportada e usada no build do MVP)
 - Windows 10/11 para uso completo do fluxo com DOCX
 - Microsoft Word instalado **apenas** quando for necessário converter DOCX para PDF
 
