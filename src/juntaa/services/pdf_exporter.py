@@ -32,7 +32,10 @@ def export_items_to_pdf(
     if not items:
         raise ExportError("Adicione ao menos um arquivo antes de exportar.")
 
-    preset = COMPRESSION_PRESETS[compression_label]
+    try:
+        preset = COMPRESSION_PRESETS[compression_label]
+    except KeyError as exc:
+        raise ExportError("Nível de compressão inválido.") from exc
     writer = PdfWriter()
     warnings: list[str] = []
 
@@ -86,9 +89,9 @@ def _append_pdf(pdf_path: Path, writer: PdfWriter) -> None:
 
 
 def _convert_image_to_pdf(source: Path, tmp_dir: Path, preset: CompressionPreset, index: int) -> Path:
-    image = Image.open(source)
-    image.load()
-    normalized = _normalize_image(image, preset)
+    with Image.open(source) as image:
+        image.load()
+        normalized = _normalize_image(image, preset)
 
     pdf_path = tmp_dir / f"image-{index}.pdf"
     jpeg_buffer = BytesIO()

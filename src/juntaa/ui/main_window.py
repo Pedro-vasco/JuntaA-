@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QObject, Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
     QFormLayout,
@@ -31,12 +31,43 @@ from juntaa.services.pdf_exporter import ExportError, export_items_to_pdf
 LOGGER = logging.getLogger(__name__)
 
 
+class ExportWorker(QObject):
+    progress = Signal(int, int, str)
+    success = Signal(object)
+    error = Signal(str)
+    finished = Signal()
+
+    def __init__(self, items: list[MergeItem], destination: Path, compression_label: str) -> None:
+        super().__init__()
+        self.items = list(items)
+        self.destination = destination
+        self.compression_label = compression_label
+
+    def run(self) -> None:
+        try:
+            warnings = export_items_to_pdf(
+                self.items,
+                self.destination,
+                self.compression_label,
+                progress_callback=lambda current, total, message: self.progress.emit(current, total, message),
+            )
+        except ExportError as exc:
+            self.error.emit(str(exc))
+        else:
+            self.success.emit(warnings)
+        finally:
+            self.finished.emit()
+
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("JuntaA - Unificador de arquivos")
         self.resize(900, 600)
         self.items: list[MergeItem] = []
+        self.export_thread: QThread | None = None
+        self.export_worker: ExportWorker | None = None
+        self.current_destination: Path | None = None
 
         self.file_list = QListWidget()
         self.file_list.setSelectionMode(QListWidget.SingleSelection)
@@ -97,7 +128,6 @@ class MainWindow(QMainWindow):
             "MVP: itens são reordenados por arquivo. PDFs e DOCX preservam a ordem interna de páginas."
         )
         help_label.setWordWrap(True)
-        help_label.setStyleSheet("color: #666;")
 
         main_layout.addLayout(controls_layout)
         main_layout.addWidget(self.file_list, stretch=1)
@@ -202,27 +232,21 @@ class MainWindow(QMainWindow):
         self.export_button.setEnabled(False)
         self.progress_bar.setValue(0)
         self.status_bar.showMessage("Iniciando exportação...")
+        self.current_destination = destination
 
-        try:
-            warnings = export_items_to_pdf(
-                self.items,
-                destination,
-                self.compression_combo.currentText(),
-                progress_callback=self._update_progress,
-            )
-        except ExportError as exc:
-            QMessageBox.critical(self, "Falha na exportação", str(exc))
-            self.status_bar.showMessage("Falha na exportação")
-        else:
-            message = f"PDF exportado com sucesso em:\n{destination}"
-            if warnings:
-                message += "\n\nAlguns arquivos foram ignorados:\n" + "\n".join(warnings)
-            QMessageBox.information(self, "Exportação concluída", message)
-            self.status_bar.showMessage("Exportação concluída")
-        finally:
-            self.export_button.setEnabled(True)
-            if self.progress_bar.value() < 100:
-                self.progress_bar.setValue(100 if self.items else 0)
+        self.export_thread = QThread(self)
+        self.export_worker = ExportWorker(self.items, destination, self.compression_combo.currentText())
+        self.export_worker.moveToThread(self.export_thread)
+
+        self.export_thread.started.connect(self.export_worker.run)
+        self.export_worker.progress.connect(self._update_progress)
+        self.export_worker.success.connect(self._handle_export_success)
+        self.export_worker.error.connect(self._handle_export_error)
+        self.export_worker.finished.connect(self._finish_export)
+        self.export_worker.finished.connect(self.export_thread.quit)
+        self.export_worker.finished.connect(self.export_worker.deleteLater)
+        self.export_thread.finished.connect(self.export_thread.deleteLater)
+        self.export_thread.start()
 
     def _update_progress(self, current: int, total: int, message: str) -> None:
         percentage = int((current / total) * 100) if total else 0
@@ -234,3 +258,22 @@ class MainWindow(QMainWindow):
         if destination.suffix.lower() != ".pdf":
             return destination.with_suffix(".pdf")
         return destination
+
+    def _handle_export_success(self, warnings: list[str]) -> None:
+        destination = self.current_destination
+        message = f"PDF exportado com sucesso em:\n{destination}" if destination else "PDF exportado com sucesso."
+        if warnings:
+            message += "\n\nAlguns arquivos foram ignorados:\n" + "\n".join(warnings)
+        QMessageBox.information(self, "Exportação concluída", message)
+        self.status_bar.showMessage("Exportação concluída")
+
+    def _handle_export_error(self, message: str) -> None:
+        QMessageBox.critical(self, "Falha na exportação", message)
+        self.status_bar.showMessage("Falha na exportação")
+
+    def _finish_export(self) -> None:
+        self.export_button.setEnabled(True)
+        if self.progress_bar.value() < 100:
+            self.progress_bar.setValue(100 if self.items else 0)
+        self.export_thread = None
+        self.export_worker = None

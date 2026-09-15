@@ -41,6 +41,8 @@ try {{
 finally {{
     if ($document -ne $null) {{ $document.Close() }}
     if ($word -ne $null) {{ $word.Quit() }}
+    if ($document -ne $null) {{ [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($document) }}
+    if ($word -ne $null) {{ [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($word) }}
 }}
 """.strip()
     encoded_script = b64encode(script.encode("utf-16le")).decode("ascii")
@@ -59,10 +61,10 @@ finally {{
     except subprocess.CalledProcessError as exc:
         LOGGER.exception("Falha ao converter DOCX: %s", source)
         stderr = (exc.stderr or "").strip()
-        detail = f" Detalhe técnico: {stderr}" if stderr else ""
+        if stderr:
+            LOGGER.error("Detalhe do PowerShell/Word para %s: %s", source, stderr)
         raise DocxConversionError(
             "Não foi possível converter o arquivo DOCX. Verifique se o Microsoft Word está instalado e acessível."
-            + detail
         ) from exc
 
     return destination

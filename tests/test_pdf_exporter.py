@@ -8,9 +8,9 @@ from unittest.mock import patch
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
 
-from juntaa.models import MergeItem
-from juntaa.services.pdf_exporter import export_items_to_pdf
 from juntaa.converters.docx_adapter import DocxConversionError
+from juntaa.models import MergeItem
+from juntaa.services.pdf_exporter import ExportError, export_items_to_pdf
 
 
 class PdfExporterTests(unittest.TestCase):
@@ -104,6 +104,21 @@ class PdfExporterTests(unittest.TestCase):
             self.assertIn("Processando", updates[0][2])
             self.assertEqual(updates[1][0:2], (1, 1))
             self.assertIn("Concluído", updates[1][2])
+
+    def test_invalid_compression_label_raises_export_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir_name:
+            tmp_dir = Path(tmp_dir_name)
+            image_path = tmp_dir / "sample.png"
+            output_path = tmp_dir / "merged.pdf"
+
+            Image.new("RGB", (600, 400), "black").save(image_path)
+
+            with self.assertRaises(ExportError):
+                export_items_to_pdf(
+                    [MergeItem(path=image_path, item_type="image", description="Imagem")],
+                    output_path,
+                    "Inválida",
+                )
 
 
 if __name__ == "__main__":
